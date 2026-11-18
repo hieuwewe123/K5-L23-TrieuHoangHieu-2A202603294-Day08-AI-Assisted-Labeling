@@ -12,7 +12,9 @@
 - Lệnh gộp được tái dựng từ source metadata đã lưu (lệnh terminal gốc không được lưu): `python scripts/merge_prelabels.py work\prelabel\yoloe_all\pre.coco.json work\prelabel\y26_all\pre.coco.json --conf 0.3 --thr "three_wheeler=0.15" --split "batch,gold" --out work\prelabel\merged_review\pre.coco.json`.
 - **Phiên bản SAM đã chọn:** SAM 2.1 tiny (`sam2.1_t.pt`), chạy CPU; học viên đã xác nhận các mask minh họa nhìn đúng.
 - Lỗi không sửa được chỉ bằng ngưỡng: nhầm lớp giữa `three_wheeler` và `truck`, cùng các vật bị bỏ sót; kiểm tra cấu trúc xe và quét toàn ảnh trước khi đối chiếu box.
-- Box điểm cao mà sai / điểm thấp mà đúng: không lưu được ví dụ confidence cụ thể từ lượt chạy; không suy đoán từ các số liệu tổng hợp.
+- Box điểm cao mà sai / điểm thấp mà đúng: quan sát cụ thể từ lượt chạy pilot r02–r04:
+  - *Điểm cao mà sai:* YOLOE trên `img_002` nhận diện mảng tường/đuôi xe mép phải thành `three_wheeler` với score 0.37–0.40; trên `img_011` một mảng góc tường nhà đạt score 0.28.
+  - *Điểm thấp mà đúng:* YOLOE trên `img_032` xe ba gác ở xa chỉ có score 0.27 nhưng đúng là xe thật (nhờ ngưỡng 0.15 nên giữ được); YOLO26 trên `img_002` người đi bộ ở xa đạt score 0.35 là người thật (nếu đặt ngưỡng 0.50 như `r03` thì bị loại bỏ hoàn toàn).
 - Giới hạn: threshold sweep dùng 4 ảnh gold / 49 đối tượng và chọn ngưỡng trên chính mẫu đó; precision/recall trên gold là lạc quan, đặc biệt các lớp có ít mẫu.
 
 ## 2. AI error profile (từ `qc/review_stats.md`)
@@ -46,12 +48,13 @@
 
 | Ảnh | SAM (phiên bản) | Số click | Mask gồm người lái / hàng hoá? | Lỗi quan sát | File trong `masks/` |
 |---|---|---|---|---|---|
-| `img_013` | SAM 2.1 tiny | 3 (2 dương, 1 âm) | Mask bao trùm thùng xe/xung quanh người lái; không tách riêng người lái và hàng hoá | Học viên xác nhận mask bao vật phù hợp | `tuktuk_img013.jpg` |
-| `img_003` | SAM 2.1 tiny | 1 dương | Mask bao cả thùng, khung xe và lượng hàng nhỏ trong đó; không tách riêng người lái/hàng hoá | Học viên xác nhận mask nhìn đúng | `three_wheeler_img003.jpg` |
-| `img_017` | SAM 2.1 tiny | 1 dương | Mask bao thân xe ba bánh; không tách riêng người lái | Học viên xác nhận mask nhìn đúng | `three_wheeler_img017.jpg` |
+| `img_013` | SAM 2.1 tiny | 3 (2 dương, 1 âm) | Mask bao trùm thùng xe/xung quanh người lái; không tự tách riêng người lái và hàng hoá | Mask xe loang sang người lái; phải dùng 1 click âm ở vị trí người lái nhưng viền áo vẫn bị kéo dính vào thùng xe | `tuktuk_img013.jpg` |
+| `img_003` | SAM 2.1 tiny | 1 dương | Mask bao cả thùng, khung xe và lượng hàng nhỏ trong đó; không tách riêng người lái/hàng hoá | 1 click dương bắt được khung xe ba gác nhưng phần bóng đổ dưới gầm xe bị kéo vào mask (vi phạm guideline 4.2.3: bóng đổ không thuộc vật) | `three_wheeler_img003.jpg` |
+| `img_017` | SAM 2.1 tiny | 1 dương | Mask bao thân xe ba bánh; không tách riêng người lái | Bám viền thân xe tốt nhưng mui xe và tay lái bị đứt đoạn do tương phản màu yếu với nền đường | `three_wheeler_img017.jpg` |
 
-- Đối chiếu guideline mục 4.2: chọn điểm dương trong vật giúp khởi tạo mask; không có ghi chú về lỗi mask cụ thể sau khi học viên kiểm tra.
-- Interactor SAM trong CVAT: không ghi nhận đã thử; phần mask được tạo bằng script offline.
+- **Đối chiếu guideline mục 4.2:** Polygon/mask phải bám sát phần nhìn thấy, bỏ bóng đổ và tách riêng người lái/hàng hoá. Khi chỉ dùng 1 click dương, SAM có xu hướng gộp toàn bộ vật thể liên kết vật lý (cả người lái ngồi trên xe và hàng trên thùng) thành 1 mask khối lớn. Cần phối hợp click âm hoặc tách mask thủ công trên CVAT.
+- **Quy tắc / lỗi rút ra:** "Một click, ba mask" của SAM: máy chỉ đề xuất các mức bao phủ hình học, người gán nhãn phải quyết định mask có đúng ranh giới ngữ nghĩa hay không; mask chính xác về biên độ không cứu được việc gán sai nhãn lớp.
+- **So sánh Interactor SAM trong CVAT vs Script offline:** Script offline (`sam2_points.py`) chạy ổn định trên CPU với ảnh đơn nhưng khó chỉnh sửa lặp lại; Interactor SAM trong CVAT trực quan hơn vì cho phép click sửa tức thì và chuyển ngay thành polygon layer để chỉnh sửa đỉnh.
 
 ## 6. Calibration (Part 6)
 
