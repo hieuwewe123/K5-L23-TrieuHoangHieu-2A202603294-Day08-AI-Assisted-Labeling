@@ -5,7 +5,7 @@
 - Lớp: L23 (theo tên repo)
 - Tài khoản GitHub: hieuwewe123
 - Repo bài nộp (URL): https://github.com/hieuwewe123/K5-L23-TrieuHoangHieu-2A202603294-Day08-AI-Assisted-Labeling
-- Commit chốt bài (hash): 53491a8
+- Commit chốt bài (hash): bca1d8b
 - Máy: Windows, CPU (không CUDA/MPS)
 - CVAT (Docker): v2.81.0
 
