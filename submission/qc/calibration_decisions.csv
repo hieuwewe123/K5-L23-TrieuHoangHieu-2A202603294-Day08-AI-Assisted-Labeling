@@ -1,1 +1,5 @@
 case_id,image,nguon,van_de,quyet_dinh,quy_tac_ghi_vao_guideline,phien_ban_guideline
+CAL-01,khong_co_anh_trong_bo_36,cau_hoi_mo,"Không gặp xe đạp điện trong bộ ảnh; cách phân lớp còn mở","Xe có động cơ (kể cả xe máy điện) là motorbike; xe đạp không động cơ là bicycle; nếu không nhận biết được thì tick can_review","Mục 2: làm rõ bicycle và motorbike theo động cơ","v1.1"
+CAL-02,img_018,cau_hoi_mo,"Khối xe máy đỗ dày gần camera; khoảng cách không đủ để quyết định ignore","Gán riêng xe nhìn thấy rõ và cao từ 20 px; dùng một ignore_region cho cụm không tách được hoặc vật dưới 20 px","Mục 4.1: áp dụng ngưỡng 20 px cả khi cụm ở gần camera","v1.1"
+CAL-03,img_034,loi_may,"Một dự đoán three_wheeler của YOLOE không khớp nhãn cuối sau review","Không chấp nhận chỉ theo prompt/điểm tin cậy; xác nhận cấu trúc xe ba bánh nhìn thấy, nếu sai thì sửa lớp hoặc xóa","Mục 2: kiểm tra cấu trúc xe trước khi giữ nhãn three_wheeler","v1.1"
+CAL-04,img_009|img_010|img_035,bay_lot,"Bỏ sót cả 3 bẫy missing (0/3)","Ẩn nhãn máy và quét toàn ảnh tìm vật bị sót trước; sau đó kiểm box máy","Quy trình review: thêm lượt quét toàn ảnh trước khi xem nhãn máy","v1.1"
